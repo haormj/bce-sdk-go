@@ -106,26 +106,27 @@ func InitClient(config ClientConfig) {
 //     - response: the http response returned from the server
 //     - error: nil if ok otherwise the specific error
 func Execute(request *Request) (*Response, error) {
-	// Build the request object for the current requesting
-	httpRequest := &http.Request{
-		Proto:      "HTTP/1.1",
-		ProtoMajor: 1,
-		ProtoMinor: 1,
-	}
-
-	// Set the connection timeout for current request
-	httpClient.Timeout = time.Duration(request.Timeout()) * time.Second
-
-	// Set the request method
-	httpRequest.Method = request.Method()
-
 	// Set the request url
 	internalUrl := &url.URL{
 		Scheme:   request.Protocol(),
 		Host:     request.Host(),
 		Path:     request.Uri(),
-		RawQuery: request.QueryString()}
-	httpRequest.URL = internalUrl
+		RawQuery: request.QueryString(),
+	}
+
+	// Build the request object for the current requesting
+	httpRequest, err := http.NewRequestWithContext(
+		request.Context(),
+		request.Method(),
+		internalUrl.String(),
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set the connection timeout for current request
+	httpClient.Timeout = time.Duration(request.Timeout()) * time.Second
 
 	// Set the request headers
 	internalHeader := make(http.Header)

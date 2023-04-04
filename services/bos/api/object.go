@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -42,7 +43,25 @@ import (
 //     - error: nil if ok otherwise the specific error
 func PutObject(cli bce.Client, bucket, object string, body *bce.Body,
 	args *PutObjectArgs) (string, error) {
+	return PutObjectWithContext(context.Background(), cli, bucket, object, body, args)
+}
+
+// PutObjectWithContext - put the object from the string or the stream
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name of the object
+//     - object: the name of the object
+//     - body: the input content of the object
+//     - args: the optional arguments of this api
+// RETURNS:
+//     - string: the etag of the object
+//     - error: nil if ok otherwise the specific error
+func PutObjectWithContext(ctx context.Context, cli bce.Client, bucket, object string, body *bce.Body,
+	args *PutObjectArgs) (string, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, object))
 	req.SetMethod(http.PUT)
 	if body == nil {
@@ -138,7 +157,26 @@ func PutObject(cli bce.Client, bucket, object string, body *bce.Body,
 //     - error: nil if ok otherwise the specific error
 func CopyObject(cli bce.Client, bucket, object, source string,
 	args *CopyObjectArgs) (*CopyObjectResult, error) {
+	return CopyObjectWithContext(context.Background(), cli, bucket, object, source, args)
+}
+
+// CopyObjectWithContext - copy one object to a new object with new bucket and/or name. It can alse set the
+// metadata of the object with the same source and target.
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client object which can perform sending request
+//     - bucket: the bucket name of the target object
+//     - object: the name of the target object
+//     - source: the source object uri
+//     - *CopyObjectArgs: the optional input args for copying object
+// RETURNS:
+//     - *CopyObjectResult: the result object which contains etag and lastmodified
+//     - error: nil if ok otherwise the specific error
+func CopyObjectWithContext(ctx context.Context, cli bce.Client, bucket, object, source string,
+	args *CopyObjectArgs) (*CopyObjectResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, object))
 	req.SetMethod(http.PUT)
 	if len(source) == 0 {
@@ -227,12 +265,29 @@ func CopyObject(cli bce.Client, bucket, object, source string,
 //     - error: nil if ok otherwise the specific error
 func GetObject(cli bce.Client, bucket, object string, args map[string]string, // nolint:gocyclo
 	ranges ...int64) (*GetObjectResult, error) {
+	return GetObjectWithContext(context.Background(), cli, bucket, object, args, ranges...)
+}
 
+// GetObjectWithContext - get the object content with range and response-headers-specified support
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name of the object
+//     - object: the name of the object
+//     - args: the optional args in querysring
+//     - ranges: the optional range start and end to get the given object
+// RETURNS:
+//     - *GetObjectResult: the output content result of the object
+//     - error: nil if ok otherwise the specific error
+func GetObjectWithContext(ctx context.Context, cli bce.Client, bucket, object string, args map[string]string, // nolint:gocyclo
+	ranges ...int64) (*GetObjectResult, error) {
 	if object == "" {
 		err := fmt.Errorf("Get Object don't accept \"\" as a parameter")
 		return nil, err
 	}
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, object))
 	req.SetMethod(http.GET)
 
@@ -340,7 +395,22 @@ func GetObject(cli bce.Client, bucket, object string, args map[string]string, //
 //     - *GetObjectMetaResult: the result of this api
 //     - error: nil if ok otherwise the specific error
 func GetObjectMeta(cli bce.Client, bucket, object string) (*GetObjectMetaResult, error) {
+	return GetObjectMetaWithContext(context.Background(), cli, bucket, object)
+}
+
+// GetObjectMetaWithContext - get the meta data of the given object
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name of the object
+//     - object: the name of the object
+// RETURNS:
+//     - *GetObjectMetaResult: the result of this api
+//     - error: nil if ok otherwise the specific error
+func GetObjectMetaWithContext(ctx context.Context, cli bce.Client, bucket, object string) (*GetObjectMetaResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, object))
 	req.SetMethod(http.HEAD)
 
@@ -431,7 +501,23 @@ func GetObjectMeta(cli bce.Client, bucket, object string) (*GetObjectMetaResult,
 //     - *SelectObjectResult: the output select content result of the object
 //     - error: nil if ok otherwise the specific error
 func SelectObject(cli bce.Client, bucket, object string, args *SelectObjectArgs) (*SelectObjectResult, error) {
+	return SelectObjectWithContext(context.Background(), cli, bucket, object, args)
+}
+
+// SelectObjectWithContext - select the object content
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name of the object
+//     - object: the name of the object
+//     - args: the optional arguments to perform the select operation
+// RETURNS:
+//     - *SelectObjectResult: the output select content result of the object
+//     - error: nil if ok otherwise the specific error
+func SelectObjectWithContext(ctx context.Context, cli bce.Client, bucket, object string, args *SelectObjectArgs) (*SelectObjectResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, object))
 	req.SetMethod(http.POST)
 	req.SetParam("select", "")
@@ -475,7 +561,25 @@ func SelectObject(cli bce.Client, bucket, object string, args *SelectObjectArgs)
 //     - error: nil if ok otherwise the specific error
 func FetchObject(cli bce.Client, bucket, object, source string,
 	args *FetchObjectArgs) (*FetchObjectResult, error) {
+	return FetchObjectWithContext(context.Background(), cli, bucket, object, source, args)
+}
+
+// FetchObjectWithContext - fetch the object by the given url and store it to a bucket
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name to store the object
+//     - object: the name of the object to be stored
+//     - source: the source url to fetch
+//     - args: the optional arguments to perform the fetch operation
+// RETURNS:
+//     - *FetchObjectArgs: the result of this api
+//     - error: nil if ok otherwise the specific error
+func FetchObjectWithContext(ctx context.Context, cli bce.Client, bucket, object, source string,
+	args *FetchObjectArgs) (*FetchObjectResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, object))
 	req.SetMethod(http.POST)
 	req.SetParam("fetch", "")
@@ -531,7 +635,25 @@ func FetchObject(cli bce.Client, bucket, object, source string,
 //     - error: nil if ok otherwise the specific error
 func AppendObject(cli bce.Client, bucket, object string, content *bce.Body,
 	args *AppendObjectArgs) (*AppendObjectResult, error) {
+	return AppendObjectWithContext(context.Background(), cli, bucket, object, content, args)
+}
+
+// AppendObjectWithContext - append the given content to a new or existed object which is appendable
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name of the object
+//     - object: the name of the object
+//     - content: the content to be appended
+//     - args: the optional arguments to perform the append operation
+// RETURNS:
+//     - *AppendObjectResult: the result status for this api
+//     - error: nil if ok otherwise the specific error
+func AppendObjectWithContext(ctx context.Context, cli bce.Client, bucket, object string, content *bce.Body,
+	args *AppendObjectArgs) (*AppendObjectResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, object))
 	req.SetMethod(http.POST)
 	req.SetParam("append", "")
@@ -623,7 +745,21 @@ func AppendObject(cli bce.Client, bucket, object string, content *bce.Body,
 // RETURNS:
 //     - error: nil if ok otherwise the specific error
 func DeleteObject(cli bce.Client, bucket, object string) error {
+	return DeleteObjectWithContext(context.Background(), cli, bucket, object)
+}
+
+// DeleteObjectWithContext - delete the given object
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name of the object to be deleted
+//     - object: the name of the object
+// RETURNS:
+//     - error: nil if ok otherwise the specific error
+func DeleteObjectWithContext(ctx context.Context, cli bce.Client, bucket, object string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, object))
 	req.SetMethod(http.DELETE)
 
@@ -649,7 +785,23 @@ func DeleteObject(cli bce.Client, bucket, object string) error {
 //     - error: nil if ok otherwise the specific error
 func DeleteMultipleObjects(cli bce.Client, bucket string,
 	objectListStream *bce.Body) (*DeleteMultipleObjectsResult, error) {
+	return DeleteMultipleObjectsWithContext(context.Background(), cli, bucket, objectListStream)
+}
+
+// DeleteMultipleObjectsWithContext - delete the given objects within a single http request
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name of the objects to be deleted
+//     - objectListStream: the objects list to be delete with json format
+// RETURNS:
+//     - *DeleteMultipleObjectsResult: the objects failed to delete
+//     - error: nil if ok otherwise the specific error
+func DeleteMultipleObjectsWithContext(ctx context.Context, cli bce.Client, bucket string,
+	objectListStream *bce.Body) (*DeleteMultipleObjectsResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.POST)
 	req.SetParam("delete", "")
@@ -776,7 +928,26 @@ func GeneratePresignedUrlInternal(conf *bce.BceClientConfiguration, signer auth.
 //     - error: nil if success otherwise the specific error
 func PutObjectAcl(cli bce.Client, bucket, object, cannedAcl string,
 	grantRead, grantFullControl []string, aclBody *bce.Body) error {
+	return PutObjectAclWithContext(context.Background(), cli, bucket, object, cannedAcl, grantRead, grantFullControl, aclBody)
+}
+
+// PutObjectAclWithContext - set the ACL of the given object with context
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - object: the object name
+//     - cannedAcl: support private and public-read
+//     - grantRead: user id list
+//     - grantFullControl: user id list
+//     - aclBody: the acl file body
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func PutObjectAclWithContext(ctx context.Context, cli bce.Client, bucket, object, cannedAcl string,
+	grantRead, grantFullControl []string, aclBody *bce.Body) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, object))
 	req.SetMethod(http.PUT)
 	req.SetParam("acl", "")
@@ -836,7 +1007,22 @@ func PutObjectAcl(cli bce.Client, bucket, object, cannedAcl string,
 //     - result: the object acl result object
 //     - error: nil if success otherwise the specific error
 func GetObjectAcl(cli bce.Client, bucket, object string) (*GetObjectAclResult, error) {
+	return GetObjectAclWithContext(context.Background(), cli, bucket, object)
+}
+
+// GetObjectAclWithContext - get the ACL of the given object with context
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - object: the object name
+// RETURNS:
+//     - result: the object acl result object
+//     - error: nil if success otherwise the specific error
+func GetObjectAclWithContext(ctx context.Context, cli bce.Client, bucket, object string) (*GetObjectAclResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, object))
 	req.SetMethod(http.GET)
 	req.SetParam("acl", "")
@@ -864,7 +1050,21 @@ func GetObjectAcl(cli bce.Client, bucket, object string) (*GetObjectAclResult, e
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func DeleteObjectAcl(cli bce.Client, bucket, object string) error {
+	return DeleteObjectAclWithContext(context.Background(), cli, bucket, object)
+}
+
+// DeleteObjectAclWithContext - delete the ACL of the given object with context
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - object: the object name
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func DeleteObjectAclWithContext(ctx context.Context, cli bce.Client, bucket, object string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, object))
 	req.SetMethod(http.DELETE)
 	req.SetParam("acl", "")
@@ -889,7 +1089,22 @@ func DeleteObjectAcl(cli bce.Client, bucket, object string) error {
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func RestoreObject(cli bce.Client, bucket string, object string, args ArchiveRestoreArgs) error {
+	return RestoreObjectWithContext(context.Background(), cli, bucket, object, args)
+}
+
+// RestoreObjectWithContext - restore the archive object with context
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - object: the object name
+//	   - args: the restore args
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func RestoreObjectWithContext(ctx context.Context, cli bce.Client, bucket string, object string, args ArchiveRestoreArgs) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, object))
 	req.SetParam("restore", "")
 	req.SetMethod(http.POST)
@@ -918,7 +1133,23 @@ func RestoreObject(cli bce.Client, bucket string, object string, args ArchiveRes
 // RETURNS:
 //     - error: nil if ok otherwise the specific error
 func PutObjectSymlink(cli bce.Client, bucket string, object string, symlinkKey string, symlinkArgs *PutSymlinkArgs) error {
+	return PutObjectSymlinkWithContext(context.Background(), cli, bucket, object, symlinkKey, symlinkArgs)
+}
+
+// PutObjectSymlinkWithContext - put the object from the string or the stream with context
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name of the object
+//     - object: the name of the object
+//     - symlinkKey: the name of the symlink
+//     - symlinkArgs: the optional arguments of this api
+// RETURNS:
+//     - error: nil if ok otherwise the specific error
+func PutObjectSymlinkWithContext(ctx context.Context, cli bce.Client, bucket string, object string, symlinkKey string, symlinkArgs *PutSymlinkArgs) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, symlinkKey))
 	req.SetParam("symlink", "")
 	req.SetMethod(http.PUT)
@@ -959,7 +1190,7 @@ func PutObjectSymlink(cli bce.Client, bucket string, object string, symlinkKey s
 	return nil
 }
 
-// PutObjectSymlink - put the object from the string or the stream
+// GetObjectSymlink - get the object symlink
 //
 // PARAMS:
 //     - cli: the client agent which can perform sending request
@@ -969,7 +1200,22 @@ func PutObjectSymlink(cli bce.Client, bucket string, object string, symlinkKey s
 //	   - string: the name of the target object
 //     - error: nil if ok otherwise the specific error
 func GetObjectSymlink(cli bce.Client, bucket string, symlinkKey string) (string, error) {
+	return GetObjectSymlinkWithContext(context.Background(), cli, bucket, symlinkKey)
+}
+
+// GetObjectSymlinkWithContext - get the object symlink with context
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name of the object
+//     - symlinkKey: the name of the symlink
+// RETURNS:
+//	   - string: the name of the target object
+//     - error: nil if ok otherwise the specific error
+func GetObjectSymlinkWithContext(ctx context.Context, cli bce.Client, bucket string, symlinkKey string) (string, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getObjectUri(bucket, symlinkKey))
 	req.SetParam("symlink", "")
 	req.SetMethod(http.GET)

@@ -17,6 +17,7 @@
 package http
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"strconv"
@@ -40,6 +41,8 @@ type Request struct {
 	// Optional body and length fields to set the body stream and content length
 	body   io.ReadCloser
 	length int64
+
+	ctx context.Context
 }
 
 func (r *Request) Protocol() string {
@@ -209,6 +212,17 @@ func (r *Request) GenerateUrl(addPort bool) string {
 	} else {
 		return fmt.Sprintf("%s://%s%s?%s", r.protocol, r.host, r.uri, r.QueryString())
 	}
+}
+
+func (r *Request) Context() context.Context {
+	if r.ctx != nil {
+		return r.ctx
+	}
+	return context.Background()
+}
+
+func (r *Request) SetContext(ctx context.Context) {
+	r.ctx = ctx
 }
 
 func (r *Request) String() string {

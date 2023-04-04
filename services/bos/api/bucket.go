@@ -18,6 +18,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
 
@@ -33,7 +34,20 @@ import (
 //     - *ListBucketsResult: the result bucket list structure
 //     - error: nil if ok otherwise the specific error
 func ListBuckets(cli bce.Client) (*ListBucketsResult, error) {
+	return ListBucketsWithContext(context.Background(), cli)
+}
+
+// ListBucketsWithContext - list all buckets of the account
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+// RETURNS:
+//     - *ListBucketsResult: the result bucket list structure
+//     - error: nil if ok otherwise the specific error
+func ListBucketsWithContext(ctx context.Context, cli bce.Client) (*ListBucketsResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetMethod(http.GET)
 	resp := &bce.BceResponse{}
 	if err := SendRequest(cli, req, resp); err != nil {
@@ -60,7 +74,23 @@ func ListBuckets(cli bce.Client) (*ListBucketsResult, error) {
 //     - error: nil if ok otherwise the specific error
 func ListObjects(cli bce.Client, bucket string,
 	args *ListObjectsArgs) (*ListObjectsResult, error) {
+	return ListObjectsWithContext(context.Background(), cli, bucket, args)
+}
+
+// ListObjectsWithContext - list all objects of the given bucket
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - args: the optional arguments to list objects
+// RETURNS:
+//     - *ListObjectsResult: the result object list structure
+//     - error: nil if ok otherwise the specific error
+func ListObjectsWithContext(ctx context.Context, cli bce.Client, bucket string,
+	args *ListObjectsArgs) (*ListObjectsResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 
@@ -107,7 +137,20 @@ func ListObjects(cli bce.Client, bucket string,
 // RETURNS:
 //     - error: nil if exists and have authority otherwise the specific error
 func HeadBucket(cli bce.Client, bucket string) (error, *bce.BceResponse) {
+	return HeadBucketWithContext(context.Background(), cli, bucket)
+}
+
+// HeadBucketWithContext - test the given bucket existed and access authority
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - error: nil if exists and have authority otherwise the specific error
+func HeadBucketWithContext(ctx context.Context, cli bce.Client, bucket string) (error, *bce.BceResponse) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.HEAD)
 	resp := &bce.BceResponse{}
@@ -121,7 +164,6 @@ func HeadBucket(cli bce.Client, bucket string) (error, *bce.BceResponse) {
 	return nil, resp
 }
 
-
 // PutBucket - create a new bucket with the given name
 //
 // PARAMS:
@@ -131,7 +173,21 @@ func HeadBucket(cli bce.Client, bucket string) (error, *bce.BceResponse) {
 //     - string: the location of the new bucket if create success
 //     - error: nil if create success otherwise the specific error
 func PutBucket(cli bce.Client, bucket string) (string, error) {
+	return PutBucketWithContext(context.Background(), cli, bucket)
+}
+
+// PutBucketWithContext - create a new bucket with the given name
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the new bucket name
+// RETURNS:
+//     - string: the location of the new bucket if create success
+//     - error: nil if create success otherwise the specific error
+func PutBucketWithContext(ctx context.Context, cli bce.Client, bucket string) (string, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.PUT)
 	resp := &bce.BceResponse{}
@@ -153,7 +209,20 @@ func PutBucket(cli bce.Client, bucket string) (string, error) {
 // RETURNS:
 //     - error: nil if delete success otherwise the specific error
 func DeleteBucket(cli bce.Client, bucket string) error {
+	return DeleteBucketWithContext(context.Background(), cli, bucket)
+}
+
+// DeleteBucketWithContext - delete an empty bucket by given name
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name to be deleted
+// RETURNS:
+//     - error: nil if delete success otherwise the specific error
+func DeleteBucketWithContext(ctx context.Context, cli bce.Client, bucket string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.DELETE)
 	resp := &bce.BceResponse{}
@@ -176,7 +245,21 @@ func DeleteBucket(cli bce.Client, bucket string) error {
 //     - string: the location of the bucket
 //     - error: nil if delete success otherwise the specific error
 func GetBucketLocation(cli bce.Client, bucket string) (string, error) {
+	return GetBucketLocationWithContext(context.Background(), cli, bucket)
+}
+
+// GetBucketLocationWithContext - get the location of the given bucket
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - string: the location of the bucket
+//     - error: nil if delete success otherwise the specific error
+func GetBucketLocationWithContext(ctx context.Context, cli bce.Client, bucket string) (string, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("location", "")
@@ -205,7 +288,22 @@ func GetBucketLocation(cli bce.Client, bucket string) (string, error) {
 // RETURNS:
 //     - error: nil if delete success otherwise the specific error
 func PutBucketAcl(cli bce.Client, bucket, cannedAcl string, aclBody *bce.Body) error {
+	return PutBucketAclWithContext(context.Background(), cli, bucket, cannedAcl, aclBody)
+}
+
+// PutBucketAclWithContext - set the acl of the given bucket
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - cannedAcl: support private, public-read, public-read-write
+//     - aclBody: the acl file body
+// RETURNS:
+//     - error: nil if delete success otherwise the specific error
+func PutBucketAclWithContext(ctx context.Context, cli bce.Client, bucket, cannedAcl string, aclBody *bce.Body) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.PUT)
 	req.SetParam("acl", "")
@@ -221,7 +319,6 @@ func PutBucketAcl(cli bce.Client, bucket, cannedAcl string, aclBody *bce.Body) e
 		req.SetHeader(http.CONTENT_TYPE, bce.DEFAULT_CONTENT_TYPE)
 		req.SetBody(aclBody)
 	}
-
 	resp := &bce.BceResponse{}
 	if err := SendRequest(cli, req, resp); err != nil {
 		return err
@@ -242,7 +339,21 @@ func PutBucketAcl(cli bce.Client, bucket, cannedAcl string, aclBody *bce.Body) e
 //     - *GetBucketAclResult: the result of the bucket acl
 //     - error: nil if success otherwise the specific error
 func GetBucketAcl(cli bce.Client, bucket string) (*GetBucketAclResult, error) {
+	return GetBucketAclWithContext(context.Background(), cli, bucket)
+}
+
+// GetBucketAclWithContext - get the acl of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - *GetBucketAclResult: the result of the bucket acl
+//     - error: nil if success otherwise the specific error
+func GetBucketAclWithContext(ctx context.Context, cli bce.Client, bucket string) (*GetBucketAclResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("acl", "")
@@ -271,7 +382,21 @@ func GetBucketAcl(cli bce.Client, bucket string) (*GetBucketAclResult, error) {
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func PutBucketLogging(cli bce.Client, bucket string, logging *bce.Body) error {
+	return PutBucketLoggingWithContext(context.Background(), cli, bucket, logging)
+}
+
+// PutBucketLoggingWithContext - set the logging prefix of the given bucket
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - logging: the logging prefix json string body
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func PutBucketLoggingWithContext(ctx context.Context, cli bce.Client, bucket string, logging *bce.Body) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.PUT)
 	req.SetParam("logging", "")
@@ -296,7 +421,21 @@ func PutBucketLogging(cli bce.Client, bucket string, logging *bce.Body) error {
 //     - *GetBucketLoggingResult: the logging setting of the bucket
 //     - error: nil if success otherwise the specific error
 func GetBucketLogging(cli bce.Client, bucket string) (*GetBucketLoggingResult, error) {
+	return GetBucketLoggingWithContext(context.Background(), cli, bucket)
+}
+
+// GetBucketLoggingWithContext - get the logging config of the given bucket
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - *GetBucketLoggingResult: the logging setting of the bucket
+//     - error: nil if success otherwise the specific error
+func GetBucketLoggingWithContext(ctx context.Context, cli bce.Client, bucket string) (*GetBucketLoggingResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("logging", "")
@@ -323,7 +462,20 @@ func GetBucketLogging(cli bce.Client, bucket string) (*GetBucketLoggingResult, e
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func DeleteBucketLogging(cli bce.Client, bucket string) error {
+	return DeleteBucketLoggingWithContext(context.Background(), cli, bucket)
+}
+
+// DeleteBucketLoggingWithContext - delete the logging setting of the given bucket
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func DeleteBucketLoggingWithContext(ctx context.Context, cli bce.Client, bucket string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.DELETE)
 	req.SetParam("logging", "")
@@ -347,7 +499,21 @@ func DeleteBucketLogging(cli bce.Client, bucket string) error {
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func PutBucketLifecycle(cli bce.Client, bucket string, lifecycle *bce.Body) error {
+	return PutBucketLifecycleWithContext(context.Background(), cli, bucket, lifecycle)
+}
+
+// PutBucketLifecycleWithContext - set the lifecycle rule of the given bucket
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - lifecycle: the lifecycle rule json string body
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func PutBucketLifecycleWithContext(ctx context.Context, cli bce.Client, bucket string, lifecycle *bce.Body) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.PUT)
 	req.SetParam("lifecycle", "")
@@ -372,7 +538,21 @@ func PutBucketLifecycle(cli bce.Client, bucket string, lifecycle *bce.Body) erro
 //     - *GetBucketLifecycleResult: the lifecycle rule of the bucket
 //     - error: nil if success otherwise the specific error
 func GetBucketLifecycle(cli bce.Client, bucket string) (*GetBucketLifecycleResult, error) {
+	return GetBucketLifecycleWithContext(context.Background(), cli, bucket)
+}
+
+// GetBucketLifecycleWithContext - get the lifecycle rule of the given bucket
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - *GetBucketLifecycleResult: the lifecycle rule of the bucket
+//     - error: nil if success otherwise the specific error
+func GetBucketLifecycleWithContext(ctx context.Context, cli bce.Client, bucket string) (*GetBucketLifecycleResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("lifecycle", "")
@@ -399,7 +579,20 @@ func GetBucketLifecycle(cli bce.Client, bucket string) (*GetBucketLifecycleResul
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func DeleteBucketLifecycle(cli bce.Client, bucket string) error {
+	return DeleteBucketLifecycleWithContext(context.Background(), cli, bucket)
+}
+
+// DeleteBucketLifecycleWithContext - delete the lifecycle rule of the given bucket
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func DeleteBucketLifecycleWithContext(ctx context.Context, cli bce.Client, bucket string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.DELETE)
 	req.SetParam("lifecycle", "")
@@ -423,7 +616,21 @@ func DeleteBucketLifecycle(cli bce.Client, bucket string) error {
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func PutBucketStorageclass(cli bce.Client, bucket, storageClass string) error {
+	return PutBucketStorageclassWithContext(context.Background(), cli, bucket, storageClass)
+}
+
+// PutBucketStorageclassWithContext - set the storage class of the given bucket
+//
+// PARAMS:
+//     - ctx: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - storageClass: the storage class string
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func PutBucketStorageclassWithContext(ctx context.Context, cli bce.Client, bucket, storageClass string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.PUT)
 	req.SetParam("storageClass", "")
@@ -459,7 +666,21 @@ func PutBucketStorageclass(cli bce.Client, bucket, storageClass string) error {
 //     - string: the storage class of the bucket
 //     - error: nil if success otherwise the specific error
 func GetBucketStorageclass(cli bce.Client, bucket string) (string, error) {
+	return GetBucketStorageclassWithContext(context.Background(), cli, bucket)
+}
+
+// GetBucketStorageclassWithContext - get the storage class of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - string: the storage class of the bucket
+//     - error: nil if success otherwise the specific error
+func GetBucketStorageclassWithContext(ctx context.Context, cli bce.Client, bucket string) (string, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("storageClass", "")
@@ -488,7 +709,22 @@ func GetBucketStorageclass(cli bce.Client, bucket string) (string, error) {
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func PutBucketReplication(cli bce.Client, bucket string, replicationConf *bce.Body, replicationRuleId string) error {
+	return PutBucketReplicationWithContext(context.Background(), cli, bucket, replicationConf, replicationRuleId)
+}
+
+// PutBucketReplicationWithContext - set the bucket replication of different region
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - replicationConf: the replication config body stream
+//     - replicationRuleId: the replication rule id composed of [0-9 A-Z a-z _ -]
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func PutBucketReplicationWithContext(ctx context.Context, cli bce.Client, bucket string, replicationConf *bce.Body, replicationRuleId string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.PUT)
 	req.SetParam("replication", "")
@@ -522,7 +758,22 @@ func PutBucketReplication(cli bce.Client, bucket string, replicationConf *bce.Bo
 //     - *GetBucketReplicationResult: the result of the bucket replication config
 //     - error: nil if success otherwise the specific error
 func GetBucketReplication(cli bce.Client, bucket string, replicationRuleId string) (*GetBucketReplicationResult, error) {
+	return GetBucketReplicationWithContext(context.Background(), cli, bucket, replicationRuleId)
+}
+
+// GetBucketReplicationWithContext - get the bucket replication config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - replicationRuleId: the replication rule id composed of [0-9 A-Z a-z _ -]
+// RETURNS:
+//     - *GetBucketReplicationResult: the result of the bucket replication config
+//     - error: nil if success otherwise the specific error
+func GetBucketReplicationWithContext(ctx context.Context, cli bce.Client, bucket string, replicationRuleId string) (*GetBucketReplicationResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("replication", "")
@@ -552,7 +803,20 @@ func GetBucketReplication(cli bce.Client, bucket string, replicationRuleId strin
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func ListBucketReplication(cli bce.Client, bucket string) (*ListBucketReplicationResult, error) {
+	return ListBucketReplicationWithContext(context.Background(), cli, bucket)
+}
+
+// ListBucketReplicationWithContext - list all replication config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func ListBucketReplicationWithContext(ctx context.Context, cli bce.Client, bucket string) (*ListBucketReplicationResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("replication", "")
@@ -580,7 +844,21 @@ func ListBucketReplication(cli bce.Client, bucket string) (*ListBucketReplicatio
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func DeleteBucketReplication(cli bce.Client, bucket string, replicationRuleId string) error {
+	return DeleteBucketReplicationWithContext(context.Background(), cli, bucket, replicationRuleId)
+}
+
+// DeleteBucketReplicationWithContext - delete the bucket replication config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - replicationRuleId: the replication rule id composed of [0-9 A-Z a-z _ -]
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func DeleteBucketReplicationWithContext(ctx context.Context, cli bce.Client, bucket string, replicationRuleId string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.DELETE)
 	req.SetParam("replication", "")
@@ -609,7 +887,23 @@ func DeleteBucketReplication(cli bce.Client, bucket string, replicationRuleId st
 //     - error: nil if success otherwise the specific error
 func GetBucketReplicationProgress(cli bce.Client, bucket string, replicationRuleId string) (
 	*GetBucketReplicationProgressResult, error) {
+	return GetBucketReplicationProgressWithContext(context.Background(), cli, bucket, replicationRuleId)
+}
+
+// GetBucketReplicationProgressWithContext - get the bucket replication process of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - replicationRuleId: the replication rule id composed of [0-9 A-Z a-z _ -]
+// RETURNS:
+//     - *GetBucketReplicationProgressResult: the result of the bucket replication process
+//     - error: nil if success otherwise the specific error
+func GetBucketReplicationProgressWithContext(ctx context.Context, cli bce.Client, bucket string, replicationRuleId string) (
+	*GetBucketReplicationProgressResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("replicationProgress", "")
@@ -631,7 +925,7 @@ func GetBucketReplicationProgress(cli bce.Client, bucket string, replicationRule
 	return result, nil
 }
 
-// PutBucketEncryption - set the bucket encrpytion config
+// PutBucketEncryption - set the bucket encrpytion config of the given bucket
 //
 // PARAMS:
 //     - cli: the client agent which can perform sending request
@@ -640,7 +934,21 @@ func GetBucketReplicationProgress(cli bce.Client, bucket string, replicationRule
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func PutBucketEncryption(cli bce.Client, bucket, algorithm string) error {
+	return PutBucketEncryptionWithContext(context.Background(), cli, bucket, algorithm)
+}
+
+// PutBucketEncryptionWithContext - set the bucket encrpytion config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - algorithm: the encryption algorithm
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func PutBucketEncryptionWithContext(ctx context.Context, cli bce.Client, bucket, algorithm string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.PUT)
 	req.SetParam("encryption", "")
@@ -677,7 +985,21 @@ func PutBucketEncryption(cli bce.Client, bucket, algorithm string) error {
 //     - algorithm: the bucket encryption algorithm
 //     - error: nil if success otherwise the specific error
 func GetBucketEncryption(cli bce.Client, bucket string) (string, error) {
+	return GetBucketEncryptionWithContext(context.Background(), cli, bucket)
+}
+
+// GetBucketEncryptionWithContext - get the encryption config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - algorithm: the bucket encryption algorithm
+//     - error: nil if success otherwise the specific error
+func GetBucketEncryptionWithContext(ctx context.Context, cli bce.Client, bucket string) (string, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("encryption", "")
@@ -704,7 +1026,20 @@ func GetBucketEncryption(cli bce.Client, bucket string) (string, error) {
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func DeleteBucketEncryption(cli bce.Client, bucket string) error {
+	return DeleteBucketEncryptionWithContext(context.Background(), cli, bucket)
+}
+
+// DeleteBucketEncryption - delete the encryption config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func DeleteBucketEncryptionWithContext(ctx context.Context, cli bce.Client, bucket string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.DELETE)
 	req.SetParam("encryption", "")
@@ -728,7 +1063,21 @@ func DeleteBucketEncryption(cli bce.Client, bucket string) error {
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func PutBucketStaticWebsite(cli bce.Client, bucket string, confBody *bce.Body) error {
+	return PutBucketStaticWebsiteWithContext(context.Background(), cli, bucket, confBody)
+}
+
+// PutBucketStaticWebsiteWithContext - set the bucket static website config
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - confBody: the static website config body stream
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func PutBucketStaticWebsiteWithContext(ctx context.Context, cli bce.Client, bucket string, confBody *bce.Body) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.PUT)
 	req.SetParam("website", "")
@@ -758,7 +1107,22 @@ func PutBucketStaticWebsite(cli bce.Client, bucket string, confBody *bce.Body) e
 //     - error: nil if success otherwise the specific error
 func GetBucketStaticWebsite(cli bce.Client, bucket string) (
 	*GetBucketStaticWebsiteResult, error) {
+	return GetBucketStaticWebsiteWithContext(context.Background(), cli, bucket)
+}
+
+// GetBucketStaticWebsiteWithContext - get the static website config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - result: the bucket static website config result object
+//     - error: nil if success otherwise the specific error
+func GetBucketStaticWebsiteWithContext(ctx context.Context, cli bce.Client, bucket string) (
+	*GetBucketStaticWebsiteResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("website", "")
@@ -785,7 +1149,20 @@ func GetBucketStaticWebsite(cli bce.Client, bucket string) (
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func DeleteBucketStaticWebsite(cli bce.Client, bucket string) error {
+	return DeleteBucketStaticWebsiteWithContext(context.Background(), cli, bucket)
+}
+
+// DeleteBucketStaticWebsiteWithContext - delete the static website config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func DeleteBucketStaticWebsiteWithContext(ctx context.Context, cli bce.Client, bucket string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.DELETE)
 	req.SetParam("website", "")
@@ -809,7 +1186,21 @@ func DeleteBucketStaticWebsite(cli bce.Client, bucket string) error {
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func PutBucketCors(cli bce.Client, bucket string, confBody *bce.Body) error {
+	return PutBucketCorsWithContext(context.Background(), cli, bucket, confBody)
+}
+
+// PutBucketCorsWithContext - set the bucket CORS config
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - confBody: the CORS config body stream
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func PutBucketCorsWithContext(ctx context.Context, cli bce.Client, bucket string, confBody *bce.Body) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.PUT)
 	req.SetParam("cors", "")
@@ -839,7 +1230,22 @@ func PutBucketCors(cli bce.Client, bucket string, confBody *bce.Body) error {
 //     - error: nil if success otherwise the specific error
 func GetBucketCors(cli bce.Client, bucket string) (
 	*GetBucketCorsResult, error) {
+	return GetBucketCorsWithContext(context.Background(), cli, bucket)
+}
+
+// GetBucketCorsWithContext - get the CORS config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - result: the bucket CORS config result object
+//     - error: nil if success otherwise the specific error
+func GetBucketCorsWithContext(ctx context.Context, cli bce.Client, bucket string) (
+	*GetBucketCorsResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("cors", "")
@@ -866,7 +1272,20 @@ func GetBucketCors(cli bce.Client, bucket string) (
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func DeleteBucketCors(cli bce.Client, bucket string) error {
+	return DeleteBucketCorsWithContext(context.Background(), cli, bucket)
+}
+
+// DeleteBucketCorsWithContext - delete the CORS config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func DeleteBucketCorsWithContext(ctx context.Context, cli bce.Client, bucket string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.DELETE)
 	req.SetParam("cors", "")
@@ -890,7 +1309,21 @@ func DeleteBucketCors(cli bce.Client, bucket string) error {
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func PutBucketCopyrightProtection(cli bce.Client, bucket string, resources ...string) error {
+	return PutBucketCopyrightProtectionWithContext(context.Background(), cli, bucket, resources...)
+}
+
+// PutBucketCopyrightProtectionWithContext - set the copyright protection config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//     - resources: the resource items in the bucket to be protected
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func PutBucketCopyrightProtectionWithContext(ctx context.Context, cli bce.Client, bucket string, resources ...string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.PUT)
 	req.SetParam("copyrightProtection", "")
@@ -929,7 +1362,21 @@ func PutBucketCopyrightProtection(cli bce.Client, bucket string, resources ...st
 //     - result: the bucket copyright protection resources array
 //     - error: nil if success otherwise the specific error
 func GetBucketCopyrightProtection(cli bce.Client, bucket string) ([]string, error) {
+	return GetBucketCopyrightProtectionWithContext(context.Background(), cli, bucket)
+}
+
+// GetBucketCopyrightProtectionWithContext - get the copyright protection config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - result: the bucket copyright protection resources array
+//     - error: nil if success otherwise the specific error
+func GetBucketCopyrightProtectionWithContext(ctx context.Context, cli bce.Client, bucket string) ([]string, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("copyrightProtection", "")
@@ -956,7 +1403,20 @@ func GetBucketCopyrightProtection(cli bce.Client, bucket string) ([]string, erro
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func DeleteBucketCopyrightProtection(cli bce.Client, bucket string) error {
+	return DeleteBucketCopyrightProtectionWithContext(context.Background(), cli, bucket)
+}
+
+// DeleteBucketCopyrightProtectionWithContext - delete the copyright protection config of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func DeleteBucketCopyrightProtectionWithContext(ctx context.Context, cli bce.Client, bucket string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.DELETE)
 	req.SetParam("copyrightProtection", "")
@@ -980,7 +1440,22 @@ func DeleteBucketCopyrightProtection(cli bce.Client, bucket string) error {
 // RETURNS:
 //     - error: nil if success otherwise the specific error
 func PutBucketTrash(cli bce.Client, bucket string, trashReq PutBucketTrashReq) error {
+	return PutBucketTrashWithContext(context.Background(), cli, bucket, trashReq)
+}
+
+// PutBucketTrashWithContext - put the trash setting of the given bucket
+//
+// PARAMS:
+//     - context: context to control the request
+//     - cli: the client agent which can perform sending request
+//     - bucket: the bucket name
+//	   - trashDir: the trash dir name
+// RETURNS:
+//     - error: nil if success otherwise the specific error
+func PutBucketTrashWithContext(ctx context.Context, cli bce.Client, bucket string,
+	trashReq PutBucketTrashReq) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.PUT)
 	req.SetParam("trash", "")
@@ -1002,7 +1477,12 @@ func PutBucketTrash(cli bce.Client, bucket string, trashReq PutBucketTrashReq) e
 }
 
 func GetBucketTrash(cli bce.Client, bucket string) (*GetBucketTrashResult, error) {
+	return GetBucketTrashWithContext(context.Background(), cli, bucket)
+}
+
+func GetBucketTrashWithContext(ctx context.Context, cli bce.Client, bucket string) (*GetBucketTrashResult, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("trash", "")
@@ -1021,7 +1501,12 @@ func GetBucketTrash(cli bce.Client, bucket string) (*GetBucketTrashResult, error
 }
 
 func DeleteBucketTrash(cli bce.Client, bucket string) error {
+	return DeleteBucketTrashWithContext(context.Background(), cli, bucket)
+}
+
+func DeleteBucketTrashWithContext(ctx context.Context, cli bce.Client, bucket string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.DELETE)
 	req.SetParam("trash", "")
@@ -1037,7 +1522,13 @@ func DeleteBucketTrash(cli bce.Client, bucket string) error {
 }
 
 func PutBucketNotification(cli bce.Client, bucket string, putBucketNotificationReq PutBucketNotificationReq) error {
+	return PutBucketNotificationWithContext(context.Background(), cli, bucket, putBucketNotificationReq)
+}
+
+func PutBucketNotificationWithContext(ctx context.Context, cli bce.Client, bucket string,
+	putBucketNotificationReq PutBucketNotificationReq) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.PUT)
 	req.SetParam("notification", "")
@@ -1059,7 +1550,12 @@ func PutBucketNotification(cli bce.Client, bucket string, putBucketNotificationR
 }
 
 func GetBucketNotification(cli bce.Client, bucket string) (*PutBucketNotificationReq, error) {
+	return GetBucketNotificationWithContext(context.Background(), cli, bucket)
+}
+
+func GetBucketNotificationWithContext(ctx context.Context, cli bce.Client, bucket string) (*PutBucketNotificationReq, error) {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.GET)
 	req.SetParam("notification", "")
@@ -1078,7 +1574,12 @@ func GetBucketNotification(cli bce.Client, bucket string) (*PutBucketNotificatio
 }
 
 func DeleteBucketNotification(cli bce.Client, bucket string) error {
+	return DeleteBucketNotificationWithContext(context.Background(), cli, bucket)
+}
+
+func DeleteBucketNotificationWithContext(ctx context.Context, cli bce.Client, bucket string) error {
 	req := &bce.BceRequest{}
+	req.SetContext(ctx)
 	req.SetUri(getBucketUri(bucket))
 	req.SetMethod(http.DELETE)
 	req.SetParam("notification", "")
